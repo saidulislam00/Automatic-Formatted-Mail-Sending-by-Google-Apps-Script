@@ -24,10 +24,5 @@ Automate email notifications triggered by Google Forms submissions with this Goo
     <li>📊 <strong>Status Logging</strong>: Keep track of sent emails in your Google Sheet.</li>
 </ul>
 
-<p style="font-size: 1.1em; color: #555;">
-    Dive into the code and start enhancing your Google Forms experience today! 
-    For more details, visit our <a href="[https://saidulislam00.github.io/your-repo](https://github.com/saidulislam00)" style="color: #4CAF50; text-decoration: underline;">GitHub Pages</a>.
-</p>
-
 </div>
 
