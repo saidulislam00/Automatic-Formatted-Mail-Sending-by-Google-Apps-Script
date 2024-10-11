@@ -1,0 +1,36 @@
+var docUrl = 'https://docs.google.com/document/d/11-JXr97flL9c9K8yYA8vTWRC7QP1UpMP-eZTOxNtXAc/edit?usp=sharing';
+var subject = 'This is a test mail';
+
+function onSubmit(event) {
+  var data = event.namedValues;
+  var recipient = data['Email address'][0].trim();
+  Logger.log('; data=' + JSON.stringify(data));
+
+  MailApp.sendEmail({
+    to: recipient,
+    subject: subject,
+    htmlBody: generateEmailBody(),
+  });
+  Logger.log('email sent to: ' + recipient);
+
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var row = sheet.getActiveRange().getRow();
+  var col = event.values.length + 1;
+  sheet.getRange(row, col).setValue('Email Sent');
+}
+
+function generateEmailBody() {
+  var documentId = DocumentApp.openByUrl(docUrl).getId();
+  var body = fetchHtml(documentId);
+  return body;
+}
+
+function fetchHtml(documentId) {
+  var url = 'https://docs.google.com/feeds/download/documents/export/Export?id=' + documentId + '&exportFormat=html';
+  var options = {
+    method: 'get',
+    headers: {'Authorization': 'Bearer ' + ScriptApp.getOAuthToken()},
+    muteHttpExceptions: true,
+  };
+  return UrlFetchApp.fetch(url, options).getContentText();
+}
