@@ -1,0 +1,45 @@
+## Usage
+
+Follow these steps to use the **Google Apps Script Email Notification System**:
+
+### Step 1: Set Up Your Google Form
+
+1. Create a new Google Form or open an existing one.
+2. Ensure your form includes a question that captures the respondent's email address. The question title should be **exactly** `Email address` for the script to work correctly.
+
+### Step 2: Open the Script Editor
+
+1. In your Google Form, click on the three vertical dots (More) in the upper right corner.
+2. Select **Script editor**. This will open the Google Apps Script editor.
+
+### Step 3: Copy the Code
+
+1. Copy the provided code from this repository.
+2. Paste the code into the script editor, replacing any existing code.
+
+### Step 4: Configure the Email Template
+
+1. Open the **EMAIL_TEMPLATE_DOC_URL** variable in the script and replace the URL with the link to your Google Docs email template.
+2. Customize the email template in Google Docs to suit your needs.
+
+### Step 5: Set Up Triggers
+
+1. In the Apps Script editor, click on the clock icon (Triggers).
+2. Click on **Add Trigger**.
+3. Choose the function `onFormSubmit` from the dropdown menu.
+4. Set the event type to **On form submit** and click **Save**.
+
+### Step 6: Test Your Setup
+
+1. Submit a response to your Google Form.
+2. Check the email address you provided to verify that the email notification has been sent successfully.
+3. You can also check your Google Sheet for a status update indicating that the email was sent.
+
+### Step 7: Monitor and Maintain
+
+- Keep an eye on the Google Apps Script quotas and limits to ensure your script runs smoothly.
+- Update the email template and script as needed for any changes in your project requirements.
+
+### Additional Information
+
+- For more details on customizing the code or troubleshooting common issues, please refer to the [documentation](https://developers.google.com/apps-script/guides/sheets).
