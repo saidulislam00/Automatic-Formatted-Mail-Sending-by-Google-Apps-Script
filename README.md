@@ -19,7 +19,7 @@ Automate email notifications triggered by Google Forms submissions with this Goo
     </p>
     <h3style="color: #333;">✨ Features:</h3>
 <ul style="color: #555;">
-    <li>💌 <strong>Automated Email Sending</strong>: Respond instantly!</li>
+    <li>🟩 <strong>Automated Email Sending</strong>: Respond instantly!</li>
     <li>📄 <strong>Dynamic Email Templates</strong>: Use Google Docs for customizable content.</li>
     <li>📊 <strong>Status Logging</strong>: Keep track of sent emails in your Google Sheet.</li>
 </ul>
