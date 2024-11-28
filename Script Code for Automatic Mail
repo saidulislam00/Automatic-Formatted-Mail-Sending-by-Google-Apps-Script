@@ -1,36 +1,87 @@
-var docUrl = 'https://docs.google.com/document/d/11-JXr97flL9c9K8yYA8vTWRC7QP1UpMP-eZTOxNtXAc/edit?usp=sharing';
-var subject = 'This is a test mail';
+var SHEET_ID = "12vbfFblOop846jD9D9ljokiWzeiEhtKccjfyXh-wKtY"; // Replace with your Google Sheet ID
+var DOC_ID = "1WubuCLhpZvOR0Y-9ioMF2D1qtPHW7YFj0VayXY8amXM"; // Replace with your Google Docs Template ID
 
-function onSubmit(event) {
-  var data = event.namedValues;
-  var recipient = data['Email address'][0].trim();
-  Logger.log('; data=' + JSON.stringify(data));
+function onSubmit(e) {
+  // Get the form response values
+  var formResponse = e.values;
+  var email = formResponse[1]; // Email from form
+  var name = formResponse[2]; // Name from form
+  var batch = formResponse[3]; // Batch from form
 
-  MailApp.sendEmail({
-    to: recipient,
-    subject: subject,
-    htmlBody: generateEmailBody(),
+  // Open the spreadsheet to assign unique IDs
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sheet = ss.getSheetByName("Form Responses 1");
+  var lastRow = sheet.getLastRow();
+
+  // Assign unique ID
+  var uniqueId = assignUniqueId(batch);
+  sheet.getRange(lastRow, 5).setValue(uniqueId);
+  // Prepare email body with preserved formatting
+  var emailBody = getFormattedEmailBody(name, batch, uniqueId);
+
+  // Check if the email was already sent
+  var emailSentFlag = sheet.getRange(lastRow, 6).getValue(); // Check the 'Email Sent' column (or any other flag column)
+
+  // If email hasn't been sent yet, send the email and mark the submission as processed
+  if (emailSentFlag !== "Sent") {
+    GmailApp.sendEmail(email, "Dummy Subject", "", { htmlBody: emailBody });
+
+    // Mark email as sent in the next column (you can create a new "Email Sent" column)
+    sheet.getRange(lastRow, 6).setValue("Sent");
+    Logger.log("Email sent to: " + email + " with ID: " + uniqueId);
+  } else {
+    Logger.log("Email already sent to: " + email);
+  }
+}
+
+// Generate a unique ID for each batch
+function assignUniqueId(batch) {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var counterSheet = ss.getSheetByName("BatchCounters");
+
+  // If "BatchCounters" sheet doesn't exist, create it
+  if (!counterSheet) {
+    counterSheet = ss.insertSheet("BatchCounters");
+    counterSheet.appendRow(["Batch", "Counter"]); // Add headers
+    counterSheet.appendRow(["20", 0]);
+    counterSheet.appendRow(["21", 0]);
+    counterSheet.appendRow(["22", 0]);
+    counterSheet.appendRow(["19", 0]);
+  }
+
+  // Get batch counters
+  var data = counterSheet.getDataRange().getValues();
+
+  // Find the row for the batch and increment the counter
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] == batch) {
+      data[i][1]++; // Increment the counter
+      counterSheet.getRange(i + 1, 2).setValue(data[i][1]);
+      var uniqueId = batch + String(data[i][1]).padStart(3, "0"); // E.g., 20001, 21001, 22001
+      return uniqueId;
+    }
+  }
+
+  // If the batch doesn't exist in the "BatchCounters" sheet, add it
+  counterSheet.appendRow([batch, 1]);
+  return batch + "001";
+}
+
+// Extract and format the email body from Google Docs
+function getFormattedEmailBody(name, batch, uniqueId) {
+  var doc = DocumentApp.openById(DOC_ID); // Open the Google Docs template
+  var url = "https://docs.google.com/feeds/download/documents/export/Export?id=" + DOC_ID + "&exportFormat=html";
+  var response = UrlFetchApp.fetch(url, {
+    headers: { Authorization: "Bearer " + ScriptApp.getOAuthToken() },
   });
-  Logger.log('email sent to: ' + recipient);
 
-  var sheet = SpreadsheetApp.getActiveSheet();
-  var row = sheet.getActiveRange().getRow();
-  var col = event.values.length + 1;
-  sheet.getRange(row, col).setValue('Email Sent');
-}
+  var htmlBody = response.getContentText();
 
-function generateEmailBody() {
-  var documentId = DocumentApp.openByUrl(docUrl).getId();
-  var body = fetchHtml(documentId);
-  return body;
-}
+  // Replace placeholders in the HTML
+  htmlBody = htmlBody
+    .replace("{name}", name)
+    .replace("{batch}", batch)
+    .replace("{uniqueId}", uniqueId);
 
-function fetchHtml(documentId) {
-  var url = 'https://docs.google.com/feeds/download/documents/export/Export?id=' + documentId + '&exportFormat=html';
-  var options = {
-    method: 'get',
-    headers: {'Authorization': 'Bearer ' + ScriptApp.getOAuthToken()},
-    muteHttpExceptions: true,
-  };
-  return UrlFetchApp.fetch(url, options).getContentText();
+  return htmlBody;
 }
